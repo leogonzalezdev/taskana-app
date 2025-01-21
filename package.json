@@ -23,8 +23,7 @@
     "test": "react-scripts test",
     "eject": "react-scripts eject",
     "format:check": "prettier --check .",
-    "format:write": "prettier --write .",
-    "prepare": "husky install"
+    "format:write": "prettier --write ."
   },
   "browserslist": {
     "production": [
