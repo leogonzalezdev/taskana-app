@@ -49,6 +49,7 @@ const TodoCard = ({ cardId, title, listId, member, index }) => {
 
   const renderCard = () => (
     <div className="todoCard">
+      {/* Botón de acción */}
       <div className="todoCard__button">
         <ButtonIcon
           icon="material-symbols:delete-outline"
@@ -57,9 +58,21 @@ const TodoCard = ({ cardId, title, listId, member, index }) => {
           onClick={handleRemoveCard}
         />
       </div>
-      <div className="todoCard__title">{title}</div>
+  
+      {/* Título de la tarjeta con ícono decorativo */}
+      <div className="todoCard__header">
+        <span className="todoCard__icon">📝</span>
+        <div className="todoCard__title">{title}</div>
+      </div>
+  
+      {/* Pie de tarjeta opcional */}
+      <div className="todoCard__footer">
+        <span className="todoCard__tag">Etiqueta</span>
+        <span className="todoCard__timestamp">Hace 5 minutos</span>
+      </div>
     </div>
-  )
+  );
+  
 
   return (
     <Draggable draggableId={String(cardId)} index={index}>

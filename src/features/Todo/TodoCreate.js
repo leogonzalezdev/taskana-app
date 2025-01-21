@@ -80,7 +80,7 @@ const TodoCreate = ({ isLists, listId, className }) => {
         </>
       ) : (
         <div className="todoCreate__button" onClick={handleOpenForm}>
-          <ButtonIcon icon="material-symbols:add" color="#fff" />
+          <ButtonIcon icon="material-symbols:add" />
           <span>{label}</span>
         </div>
       )}

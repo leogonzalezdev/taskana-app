@@ -1,224 +1,201 @@
-import { mockData } from 'mocks/data'
+import { mockData } from 'mocks/data';
 
 /* TYPES */
-const ADD_LIST = 'TRELLO/ADD_LIST'
-const CHANGE_TITLE_LIST = 'TRELLO/CHANGE_TITLE_LIST'
-const REMOVE_LIST = 'TRELLO/REMOVE_LIST'
+const ADD_LIST = 'TRELLO/ADD_LIST';
+const CHANGE_TITLE_LIST = 'TRELLO/CHANGE_TITLE_LIST';
+const REMOVE_LIST = 'TRELLO/REMOVE_LIST';
+const ADD_CARD = 'TRELLO/ADD_CARD';
+const REMOVE_CARD = 'TRELLO/REMOVE_CARD';
+const EDIT_CARD = 'TRELLO/EDIT_CARD';
+const DRAG_END_LIST = 'TRELLO/DRAG_END_LIST';
+const DRAG_END_CARD = 'TRELLO/DRAG_END_CARD';
 
-const ADD_CARD = 'TRELLO/ADD_CARD'
-const REMOVE_CARD = 'TRELLO/REMOVE_CARD'
-const EDIT_CARD = 'TRELLO/EDIT_CARD'
+// Helpers for Local Storage
+const saveToLocalStorage = (key, value) => {
+  localStorage.setItem(key, JSON.stringify(value));
+};
 
-const DRAG_END_LIST = 'TRELLO/DRAG_END_LIST'
-const DRAG_END_CARD = 'TRELLO/DRAG_END_CARD'
+const loadFromLocalStorage = (key) => {
+  const data = localStorage.getItem(key);
+  return data ? JSON.parse(data) : null;
+};
 
-// actions
-export const addList = (payload) => ({ type: ADD_LIST, payload })
+// Initial State
+const localStorageState = loadFromLocalStorage('taskanaState');
+const initialState = localStorageState || { ...mockData };
 
+// Actions
+export const addList = (payload) => ({ type: ADD_LIST, payload });
 export const changeTitleList = (listId, title) => ({
   type: CHANGE_TITLE_LIST,
   payload: { listId, title },
-})
-
-export const removeList = (listId) => ({
-  type: REMOVE_LIST,
-  payload: { listId },
-})
-
+});
+export const removeList = (listId) => ({ type: REMOVE_LIST, payload: { listId } });
 export const addCard = (listId, card) => ({
   type: ADD_CARD,
   payload: {
     listId,
     card,
   },
-})
-
+});
 export const removeCard = (listId, cardId) => ({
   type: REMOVE_CARD,
   payload: { listId, cardId },
-})
-
+});
 export const editCard = (cardId, cardText) => ({
   type: EDIT_CARD,
   payload: { cardId, cardText },
-})
+});
+export const onDragEndList = (payload) => ({ type: DRAG_END_LIST, payload });
+export const onDragEndCard = (payload) => ({ type: DRAG_END_CARD, payload });
 
-export const onDragEndList = (payload) => ({ type: DRAG_END_LIST, payload })
-
-export const onDragEndCard = (payload) => ({ type: DRAG_END_CARD, payload })
-
-// reducers
-const initialState = {
-  ...mockData,
-}
-
+// Reducer
 const reducers = (state = initialState, { type, payload }) => {
+  let newState;
+
   switch (type) {
     case ADD_LIST: {
-      const { id, title, cards } = payload
-      const newLists = {
-        id,
-        title,
-        cards,
-      }
+      const { id, title, cards } = payload;
+      const newLists = { id, title, cards };
 
-      return {
+      newState = {
         ...state,
         columns: [...state.columns, id],
         lists: { ...state.lists, [id]: newLists },
-      }
+      };
+      break;
     }
 
     case CHANGE_TITLE_LIST: {
-      const { listId, title } = payload
-      const newLists = state.lists[listId]
-      newLists.title = title
+      const { listId, title } = payload;
+      const updatedList = { ...state.lists[listId], title };
 
-      return {
+      newState = {
         ...state,
-        lists: { ...state.lists, [listId]: newLists },
-      }
+        lists: { ...state.lists, [listId]: updatedList },
+      };
+      break;
     }
 
     case REMOVE_LIST: {
-      const { listId } = payload
-      const newLists = state.lists
-      delete newLists[listId]
-      const newColumns = state.columns.filter((column) => column !== listId)
+      const { listId } = payload;
+      const newLists = { ...state.lists };
+      delete newLists[listId];
+      const newColumns = state.columns.filter((column) => column !== listId);
 
-      return {
+      newState = {
         ...state,
         columns: newColumns,
         lists: newLists,
-      }
+      };
+      break;
     }
 
     case ADD_CARD: {
-      const { listId, card } = payload
-      const newLists = {
-        ...state.lists,
-        [listId]: {
-          ...state.lists[listId],
-          cards: [...state.lists[listId].cards, card.id],
-        },
-      }
+      const { listId, card } = payload;
+      const updatedList = {
+        ...state.lists[listId],
+        cards: [...state.lists[listId].cards, card.id],
+      };
 
-      return {
+      newState = {
         ...state,
-        lists: newLists,
+        lists: { ...state.lists, [listId]: updatedList },
         cards: { ...state.cards, [card.id]: card },
-      }
+      };
+      break;
     }
 
     case REMOVE_CARD: {
-      const { listId, cardId } = payload
-      const newCards = state.cards
-      delete newCards[cardId]
+      const { listId, cardId } = payload;
+      const newCards = { ...state.cards };
+      delete newCards[cardId];
 
-      const newLists = {
-        ...state.lists,
-        [listId]: {
-          ...state.lists[listId],
-          cards: state.lists[listId].cards.filter((card) => card !== cardId),
-        },
-      }
+      const updatedList = {
+        ...state.lists[listId],
+        cards: state.lists[listId].cards.filter((card) => card !== cardId),
+      };
 
-      return {
+      newState = {
         ...state,
-        lists: newLists,
+        lists: { ...state.lists, [listId]: updatedList },
         cards: newCards,
-      }
+      };
+      break;
     }
 
     case EDIT_CARD: {
-      const { cardId, cardText } = payload
-      const newCards = state.cards[cardId]
-      newCards.title = cardText
+      const { cardId, cardText } = payload;
+      const updatedCard = { ...state.cards[cardId], title: cardText };
 
-      return {
+      newState = {
         ...state,
-        cards: { ...state.cards, [cardId]: newCards },
-      }
+        cards: { ...state.cards, [cardId]: updatedCard },
+      };
+      break;
     }
 
     case DRAG_END_LIST: {
-      const { destination, source } = payload
-      if (destination === null) return state
+      const { destination, source } = payload;
+      if (!destination) return state;
 
-      const newColumns = [...state.columns]
-      const listSpliced = newColumns.splice(source.index, 1)[0]
-      newColumns.splice(destination.index, 0, listSpliced)
+      const newColumns = [...state.columns];
+      const [movedList] = newColumns.splice(source.index, 1);
+      newColumns.splice(destination.index, 0, movedList);
 
-      return {
+      newState = {
         ...state,
         columns: newColumns,
-      }
+      };
+      break;
     }
 
     case DRAG_END_CARD: {
-      const { destination, source } = payload
-      if (destination === null) return state
+      const { destination, source } = payload;
+      if (!destination) return state;
 
-      // in the same list
       if (source.droppableId === destination.droppableId) {
-        const droppedIdStart = source.droppableId
-        const lists = state.lists[droppedIdStart]
-        const newCards = [...lists.cards]
-        ;[newCards[source.index], newCards[destination.index]] = [
-          newCards[destination.index],
-          newCards[source.index],
-        ]
+        const list = state.lists[source.droppableId];
+        const newCards = [...list.cards];
+        const [movedCard] = newCards.splice(source.index, 1);
+        newCards.splice(destination.index, 0, movedCard);
 
-        return {
+        newState = {
           ...state,
           lists: {
             ...state.lists,
-            [droppedIdStart]: {
-              ...lists,
-              cards: newCards,
-            },
+            [source.droppableId]: { ...list, cards: newCards },
           },
-        }
-      }
+        };
+      } else {
+        const sourceList = state.lists[source.droppableId];
+        const destinationList = state.lists[destination.droppableId];
 
-      // other list
-      if (source.droppableId !== destination.droppableId) {
-        const droppedIdStart = source.droppableId
-        const droppedIdEnd = destination.droppableId
-        const listStart = state.lists[droppedIdStart]
-        const listEnd = state.lists[droppedIdEnd]
-        const newCardsStart = [...listStart.cards]
-        const newCardsEnd = [...listEnd.cards]
+        const sourceCards = [...sourceList.cards];
+        const destinationCards = [...destinationList.cards];
 
-        // cut card in list start
-        const cardSpliced = newCardsStart.splice(source.index, 1)[0]
-        // add card spliced in list end
-        newCardsEnd.splice(destination.index, 0, cardSpliced)
+        const [movedCard] = sourceCards.splice(source.index, 1);
+        destinationCards.splice(destination.index, 0, movedCard);
 
-        return {
+        newState = {
           ...state,
           lists: {
             ...state.lists,
-            [droppedIdStart]: {
-              ...listStart,
-              cards: newCardsStart,
-            },
-            [droppedIdEnd]: {
-              ...listEnd,
-              cards: newCardsEnd,
-            },
+            [source.droppableId]: { ...sourceList, cards: sourceCards },
+            [destination.droppableId]: { ...destinationList, cards: destinationCards },
           },
-        }
+        };
       }
-
-      return {
-        ...state,
-      }
+      break;
     }
 
     default:
-      return state
+      return state;
   }
-}
 
-export default reducers
+  // Save new state to localStorage
+  saveToLocalStorage('taskanaState', newState);
+  return newState;
+};
+
+export default reducers;
