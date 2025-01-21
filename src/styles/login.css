@@ -153,3 +153,68 @@ body {
 .image-overlay p {
   font-size: 14px;
 }
+
+
+@media (max-width: 768px) {
+  body {
+    background-color: #eaeff3;
+  }
+
+  .login-page {
+    height: auto;
+    padding: 20px;
+    height: 100vh;
+  }
+
+  .login-container {
+    flex-direction: column;
+    width: 90%;
+    max-width: 400px;
+    margin: 0 auto;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  }
+
+  .login-form {
+    padding: 40px 20px;
+  }
+
+  .login-title {
+    font-size: 24px;
+    text-align: center;
+  }
+
+  .login-subtitle {
+    font-size: 14px;
+    text-align: center;
+    margin-bottom: 20px;
+  }
+
+  .input-group {
+    margin-bottom: 15px;
+  }
+
+  .input {
+    padding: 10px 14px;
+    font-size: 14px;
+  }
+
+  .login-options {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .button.login-button {
+    padding: 12px 16px;
+    font-size: 15px;
+  }
+
+  .signup-link {
+    font-size: 14px;
+  }
+
+  .login-image {
+    display: none;
+  }
+}
